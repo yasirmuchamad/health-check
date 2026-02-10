@@ -1,6 +1,5 @@
 import { prisma } from "../prisma.js";
-
-import { comparePassword, generateToken, hashPassword } from "../services/auth.service.js";
+import { signin } from "../services/auth.service.js";
 
 export const register = async (req, res) => {
     try {
@@ -32,19 +31,16 @@ export const login = async(req, res) => {
     try {
         const {email, password} = req.body;
 
-        const user = await prisma.user.findUnique({
-            where: {email},            
-        });
-
-        if (!user){
-            return res.status(404).json({ message:"User not found"});
+        if (!email || !password){
+            return res.status(404).json({ message:"Email and password is reqired"});
         }
 
-        const isValid = await comparePassword(password, user.password);
+        const isValid = await signin(email, password);
 
-        if (!isValid){
-            return res.status(401).json({message:"Invalid password"});
-        }
+        res.json({
+            message:"Login Successful",
+            isValid
+        })
 
         const token = generateToken({ 
             id:user.id, 
