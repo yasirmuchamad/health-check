@@ -54,11 +54,12 @@ export const createUser = async (req, res) => {
 
         if(!name || !role || !email || !password){
             return res.status(400).json({
-                message:"name and role arre required"
+                message:"name and role are required"
             });
         }
         const user = await userService.createUser({name, role, email, password});
             res.status(201).json(user);
+            console.log("Data masuk kontroller")
         } catch (err){
             res.status(500).json({message:err.message});
         }

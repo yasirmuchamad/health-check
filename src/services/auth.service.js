@@ -37,7 +37,7 @@ export const signin = async (email, password) => {
             role:user.role
         },
         process.env.JWT_SECRET,
-        {expiresIn:"Id"}
+        {expiresIn:"1d"}
     );
     return token;
 }
