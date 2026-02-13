@@ -10,14 +10,28 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url     = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
-model User{
-  id    Int   @id @default(autoincrement())
-  name      String
-  role      String
-  email     String  @unique
-  password  String
-  createAt  DateTime @default(now())
+model User {
+  id       Int      @id @default(autoincrement())
+  name     String
+  role     String
+  email    String   @unique
+  password String
+  createAt DateTime @default(now())
+
+  auditLogs AuditLog[]
 }
+
+model AuditLog {
+  id       Int      @id @default(autoincrement())
+  userId   Int?
+  action   String
+  method   String
+  endpoint String
+  createAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+}
+

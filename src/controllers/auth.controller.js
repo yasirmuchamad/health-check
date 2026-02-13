@@ -1,5 +1,6 @@
 import { prisma } from "../prisma.js";
-import { signin } from "../services/auth.service.js";
+import { generateToken, hashPassword, signin } from "../services/auth.service.js";
+
 
 export const register = async (req, res) => {
     try {
