@@ -1,4 +1,4 @@
-import { createAuditLog } from "../service/audit.service.js";
+import { createAuditLog } from "../services/audit.service.js";
 
 export const auditMiddleware = (action) => {
     return async (req, res, next) => {

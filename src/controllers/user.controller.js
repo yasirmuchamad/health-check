@@ -1,20 +1,6 @@
 
 import * as userService from "../services/user.service.js";
 
-// export const validateUser = [
-//     body("name").notEmpty().withMessage("Name is Required"),
-//     body("email").notEmpty().withMessage("Valid email required"),
-//     body("role").notEmpty().withMessage("Role is Required"),
-//     body("password").notEmpty().withMessage("password is required"),
-//     (req, res, next) => {
-//         const errors = validationResult(req);
-//         if (!errors.isEmpty()) {
-//             return res.status(400).json({errors:errors.array() });
-//         }
-//         next();
-//     },
-// ];
-
 export const validateUser = (req, res, next) => {
     const {name, role, email, password} = req.body;
 
@@ -86,4 +72,24 @@ export const deleteUser = async (req, res) => {
 };
 
 
-
+export const getAuditLogs = async (req, res) => {
+    try {
+        const logs = await prisma.getAuditLogs.findMany({
+            include: {
+                user : {
+                    select: {
+                        id:true,
+                        name:true,
+                        role:true
+                    }
+                }
+            },
+            orderBy:{
+                createAt:"desc"
+            }
+        });
+        res.json(logs);
+    }catch(err){
+        res.status(500).json({mesage:err.message});
+    }
+};

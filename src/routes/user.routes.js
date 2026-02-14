@@ -1,12 +1,12 @@
 import express from "express";
 const router = express.Router();
 
-import { createUser, deleteUser, getUserById, getUsers, updateUser, validateUser } from "../controllers/user.controller.js";
-import { auditMiddleware } from "../middleware/audit.middleware.js";
-import { authMiddleware, } from "../middlewares/auth.middleware.js";
+import { createUser, deleteUser, getAuditLogs, getUserById, getUsers, updateUser, validateUser } from "../controllers/user.controller.js";
+import { auditMiddleware } from "../middlewares/audit.middleware.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 router.get("/", getUsers);
-// router.get("/", authMiddleware, getUsers);
+router.get("/audit", authMiddleware, getAuditLogs);
 router.get("/:id", authMiddleware, getUserById);
 router.post(
     "/", 
