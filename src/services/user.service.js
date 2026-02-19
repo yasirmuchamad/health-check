@@ -26,6 +26,11 @@ export const createUser = async(data) => {
 };
 
 export const updateUser = async(id, data) => {
+    
+    if (data.password){
+        data.password=await bcrypt.hash(data.password, 10);
+    }
+
     return prisma.user.update({
         where:{id},
         data

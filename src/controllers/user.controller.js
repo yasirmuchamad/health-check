@@ -1,4 +1,5 @@
 
+import { createAuditLog } from "../services/audit.service.js";
 import * as userService from "../services/user.service.js";
 
 export const validateUser = (req, res, next) => {
@@ -53,8 +54,26 @@ export const createUser = async (req, res) => {
 
    export const updateUser = async(req, res) => {
     try {
-        const user = await userService.updateUser(req.params.id, req.body);
-        res.json(user);
+        const id = Number(req.params.id);
+        if (isNaN(id)){
+            return res.staus(400).json({message:"Invalid ID"});         
+        }
+        const oldUser = await userService.getUserById(id);
+        const updateUser = await userService.updateUser(id, req.body);
+        
+        await createAuditLog({
+            actorId:req.user.id,
+            targetId:id,
+            action:"UPDATE_USER",
+            method:req.method,
+            endpoint:req.originalUrl,
+            ipAddress:req.ip,
+            oldData:oldUser,
+            newData:updateUser
+        });
+
+        res.json(updateUser);
+
     } catch (err){
         res.status(500).json({message:err.message});
     }
@@ -63,8 +82,20 @@ export const createUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
     try {
         const id = Number(req.params.id);
+        const oldUser = await userService.getUserById(id);
+
         await userService.deleteUser(id);
 
+        await createAuditLog({
+            actorId:req.user.id,
+            targetId:id,
+            action:"DELETE_USER",
+            method:req.method,
+            endpoint:req.originalUrl,
+            ipAddress:req.ip,
+            oldDate:oldUser
+        });
+        
         res.json({message:"User deleted successfully"});
     }catch(err){
         res.status(500).json({message:err.message});

@@ -14,24 +14,120 @@ datasource db {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  name     String
-  role     String
-  email    String   @unique
-  password String
-  createAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  name        String
+  role        Role
+  email       String   @unique
+  password    String
+  createAt    DateTime @default(now())
 
-  auditLogs AuditLog[]
+  isDeleted   Boolean @default(false)
+  deletedAt   DateTime?
+
+  healthChecks HealthCheck[] @relation("DoctorHealthChecks")
+
+  actorLogs AuditLog[]    @relation("ActorLogs")
+  targetLogs AuditLog[]   @relation("TargetLogs")
+
+  @@index([isDeleted])
+}
+
+model Patient {
+  id          Int @id @default(autoincrement())
+  name        String
+  birthDate   DateTime
+  gender      Gender
+  phone       String?
+  address     String?
+  createdAt   DateTime  @default(now())
+
+  isDeleted   Boolean @default(false)
+  deletedAt   DateTime?
+
+  healthChecks HealthCheck[]
+
+  @@index([isDeleted])
+}
+
+model HealthCheck {
+  id          Int         @id @default(autoincrement())
+  patientId   Int
+  doctorId    Int
+  visitDate   DateTime    @default(now())
+  notes       String?
+  status      CheckStatus @default(PENDING)
+
+  isDeleted   Boolean     @default(false)
+  deletedAt   DateTime?
+
+  patient     Patient @relation(fields:[patientId], references:[id])
+  doctor      User    @relation("DoctorHealthChecks", fields:[doctorId], references:[id])
+
+  checkItems  CheckItem[]
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([status])
+  @@index([isDeleted])
+  @@index([patientId, status])
+}
+
+model CheckItem {
+  id              Int   @id   @default(autoincrement())
+  healthCheckId   Int
+  name            String
+  value           String
+  normalRange     String?
+  unit            String?
+  isAbnormal      Boolean   @default(false)
+  
+  isDeleted       Boolean @default(false)
+  deletedAt       DateTime?
+
+  healthCheck HealthCheck @relation(fields: [healthCheckId], references: [id])
+
+  @@index([isDeleted])
 }
 
 model AuditLog {
-  id       Int      @id @default(autoincrement())
-  userId   Int?
-  action   String
-  method   String
-  endpoint String
-  createAt DateTime @default(now())
+  id        Int      @id @default(autoincrement())
 
-  user User? @relation(fields: [userId], references: [id])
+  actorId   Int?     
+  targetId  Int?
+
+  action    String
+  method    String
+  endpoint  String
+  ipAddress String?
+
+  oldData   Json?
+  newData   Json?
+
+  createAt  DateTime @default(now())
+
+  isDeleted   Boolean @default(false)
+  deletedAt   DateTime?
+
+  actor User? @relation("ActorLogs", fields: [actorId], references: [id])
+  target User? @relation("TargetLogs", fields:[targetId], references:[id])
+
+  @@index([isDeleted])
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  STAFF
+}
+
+enum Gender {
+  MALE 
+  FEMALE
+}
+
+enum CheckStatus {
+  PENDING
+  COMPLETED
+  CANCELED
 }
 
