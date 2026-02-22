@@ -52,27 +52,29 @@ export const createUser = async (req, res) => {
         }
     };
 
-   export const updateUser = async(req, res) => {
+export const updateUser = async(req, res) => {
+    console.log("REQ.USER:", req.user);
+    console.log("REQ.PARAMS:", req.params);
     try {
         const id = Number(req.params.id);
         if (isNaN(id)){
-            return res.staus(400).json({message:"Invalid ID"});         
+            return res.status(400).json({message:"Invalid ID"});         
         }
         const oldUser = await userService.getUserById(id);
-        const updateUser = await userService.updateUser(id, req.body);
+        const updatedUser = await userService.updateUser(id, req.body);
         
         await createAuditLog({
-            actorId:req.user.id,
-            targetId:id,
-            action:"UPDATE_USER",
-            method:req.method,
-            endpoint:req.originalUrl,
-            ipAddress:req.ip,
-            oldData:oldUser,
-            newData:updateUser
-        });
-
-        res.json(updateUser);
+            action: "UPDATE_USER",
+            method: req.method,
+            endpoint: req.originalUrl,
+            ipAddress: req.ip,
+            oldData: JSON.stringify(oldUser),
+            newData: JSON.stringify(updatedUser),
+            actorId: req.user?.id,
+            targetId: id
+        }); 
+        console.log("REQ USER: ", req.user);
+        res.json(updatedUser);
 
     } catch (err){
         res.status(500).json({message:err.message});
@@ -87,7 +89,7 @@ export const deleteUser = async (req, res) => {
         await userService.deleteUser(id);
 
         await createAuditLog({
-            actorId:req.user.id,
+            actorId:req.user?.id,
             targetId:id,
             action:"DELETE_USER",
             method:req.method,

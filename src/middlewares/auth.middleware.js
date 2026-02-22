@@ -4,7 +4,7 @@ export const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-        return res.status(401).json({ message:"Unauthorized"});
+        return res.status(401).json({ message:"No Token provided"});
     }
 
     const token = authHeader.split(" ")[1];
@@ -12,6 +12,7 @@ export const authMiddleware = (req, res, next) => {
     try {
         const decoded = verifyToken(token);
         req.user = decoded;
+        console.log("DECODED USER", decoded)
         next();
     } catch (err) {
         return res.status(401).json({
